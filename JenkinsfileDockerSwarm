@@ -1,28 +1,26 @@
-node {
-        def buildNumber = BUILD_NUMBER
-
-    stage('Check Out')
-    {
-        git credentialsId: '2143b089-9a7a-41d6-b43f-d715dae29e88', url: 'https://github.com/akareem225/java-web-app-docker.git'
+node{
+            def buildNumber = BUILD_NUMBER
+    stage('Checkout'){
+    git credentialsId: '2143b089-9a7a-41d6-b43f-d715dae29e88', url: 'https://github.com/kareemsolutions-ep/java-web-app-docker.git'
     }
-    stage(" Maven Clean Package"){
-      def mavenHome =  tool name: "Maven-3.6.2", type: "maven"
+    stage('Build'){
+              def mavenHome =  tool name: "Maven-3.6.2", type: "maven"
       def mavenCMD = "${mavenHome}/bin/mvn"
       sh "${mavenCMD} clean package"
-    } 
-        stage("Build Dokcer Image") {
+    }
+    stage("Build Dokcer Image") {
          sh "docker build -t akareem225/java-web-app:${buildNumber} ."
     }
-        stage("Docker Push"){
+    stage("Docker Push"){
 withCredentials([string(credentialsId: 'fe76dab3-fa46-4edd-a80c-042032e8428c', variable: 'Docker_Hub_Pwd')]) {
               sh "docker login -u akareem225 -p ${Docker_Hub_Pwd}"
             }
         sh "docker push akareem225/java-web-app:${buildNumber}"
         }
-        stage("Deploy to docker swarm cluster"){
+                stage("Deploy to docker swarm cluster"){
         sshagent(['Docker_Swarm_Manager_Dev']) {
             sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.4.121 docker service rm javawebapp || true'
-            sh "ssh ubuntu@172.31.4.121 docker service create --name javawebapp -p 9090:8080 --replicas 2 akareem225/java-web-app:${buildNumber}"
+            sh "ssh ubuntu@172.31.4.121 docker service create --name javawebapp -p 9090:8080 --replicas 4 akareem225/java-web-app:${buildNumber}"
         }
     }
 }
