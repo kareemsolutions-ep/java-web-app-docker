@@ -20,7 +20,7 @@ withCredentials([string(credentialsId: 'fe76dab3-fa46-4edd-a80c-042032e8428c', v
                 stage("Deploy to docker swarm cluster"){
         sshagent(['Docker_Swarm_Manager_Dev']) {
             sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.4.121 docker service rm javawebapp || true'
-            sh "ssh ubuntu@172.31.4.121 docker service create --name javawebapp -p 9090:8080 --replicas 1 akareem225/java-web-app:${buildNumber}"
+            sh "ssh ubuntu@172.31.4.121 docker service create --name javawebapp -p 9090:8080 --replicas 3 akareem225/java-web-app:${buildNumber}"
         }
     }
 }
