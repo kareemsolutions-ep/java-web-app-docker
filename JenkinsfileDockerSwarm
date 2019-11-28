@@ -1,26 +1,26 @@
 node{
-            def buildNumber = BUILD_NUMBER
-    stage('Checkout'){
-    git credentialsId: '2143b089-9a7a-41d6-b43f-d715dae29e88', url: 'https://github.com/kareemsolutions-ep/java-web-app-docker.git'
+    stage('Git Clone'){
+        git credentialsId: 'GIT_CREDENTIALS', url: 'https://github.com/kareemsolutions-ep/java-web-app-docker.git'
     }
-    stage('Build'){
-              def mavenHome =  tool name: "Maven-3.6.2", type: "maven"
-      def mavenCMD = "${mavenHome}/bin/mvn"
-      sh "${mavenCMD} clean package"
+    stage('Build Maven'){
+        def Maven_Home = tool name:"Maven-3.6.1"
+        sh "${Maven_Home}/bin/mvn clean package"
     }
-    stage("Build Dokcer Image") {
-         sh "docker build -t akareem225/java-web-app:${buildNumber} ."
+    stage('Build Docker Image'){
+        sh "docker build -t akareem225/java-web-app:1 ."
     }
-    stage("Docker Push"){
-withCredentials([string(credentialsId: 'fe76dab3-fa46-4edd-a80c-042032e8428c', variable: 'Docker_Hub_Pwd')]) {
-              sh "docker login -u akareem225 -p ${Docker_Hub_Pwd}"
-            }
-        sh "docker push akareem225/java-web-app:${buildNumber}"
+    stage('Push Image into Docker Hub'){
+withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PWD')]) {
+
+          sh "docker login -u akareem225 -p ${DOCKER_HUB_PWD}"
         }
-                stage("Deploy to docker swarm cluster"){
-        sshagent(['Docker_Swarm_Manager_Dev']) {
-            sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.4.121 docker service rm javawebapp || true'
-            sh "ssh ubuntu@172.31.4.121 docker service create --name javawebapp -p 9090:8080 --replicas 3 akareem225/java-web-app:${buildNumber}"
+        sh "docker push akareem225/java-web-app:1"
+    }
+    stage('Deploy into Docker Cluster'){
+            sshagent(['Docker_Swarm_Manager_Dev']) {
+		    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.32.242  docker service rm javawebapp || true'
+            sh "ssh ubuntu@172.31.32.242  docker service create --name javawebapp -p 9090:8080 --replicas 3 akareem225/java-web-app:1"
         }
     }
+            
 }
