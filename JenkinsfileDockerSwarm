@@ -6,10 +6,10 @@ def Maven_Home = tool name:"Maven-3.6.1"
     stage('Build Maven'){
         sh "${Maven_Home}/bin/mvn clean package"
     }
-    stage('ExecuteSoanrQubeReport')
+    /* stage('ExecuteSoanrQubeReport')
  {
  sh  "${Maven_Home}/bin/mvn sonar:sonar"
- }
+ } */
  
  stage('UploadArtifactintoNexus')
  {
