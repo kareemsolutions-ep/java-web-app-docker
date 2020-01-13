@@ -19,7 +19,9 @@ def Maven_Home = tool name:"Maven-3.6.1"
         sh "docker build -t 172.31.46.195:8083/java-web-app:1 ."
     }
     stage('Push Image into Docker Hub'){
-          sh "docker login -u admin -p admin123 172.31.46.195:8083"
+    withCredentials([string(credentialsId: 'NEXUSPSWD', variable: 'NEXUSPSWD')]) {
+            sh "docker login -u admin -p ${NEXUSPSWD} 172.31.46.195:8083"
+	  }
         sh "docker push 172.31.46.195:8083/java-web-app:1"
     }
     stage('Deploy into Docker Cluster'){
