@@ -1,9 +1,9 @@
 node{
+def Maven_Home = tool name:"Maven-3.6.1"
     stage('Git Clone'){
         git credentialsId: 'GIT_CREDENTIALS', url: 'https://github.com/kareemsolutions-ep/java-web-app-docker.git'
     }
     stage('Build Maven'){
-        def Maven_Home = tool name:"Maven-3.6.1"
         sh "${Maven_Home}/bin/mvn clean package"
     }
     stage('ExecuteSoanrQubeReport')
