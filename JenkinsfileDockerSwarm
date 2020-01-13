@@ -16,19 +16,17 @@ def Maven_Home = tool name:"Maven-3.6.1"
  sh  "${Maven_Home}/bin/mvn deploy"
  }
     stage('Build Docker Image'){
-        sh "docker build -t akareem225/java-web-app:1 ."
+        sh "docker build -t 172.31.46.195:8083/java-web-app:1 ."
     }
     stage('Push Image into Docker Hub'){
-withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PWD')]) {
-
-          sh "docker login -u akareem225 -p ${DOCKER_HUB_PWD}"
-        }
-        sh "docker push akareem225/java-web-app:1"
+          sh "docker login -u admin -p admin123 172.31.46.195:8083"
+        sh "docker push 172.31.46.195:8083/java-web-app:1"
     }
     stage('Deploy into Docker Cluster'){
             sshagent(['Docker_Swarm_Manager_Dev']) {
+	    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.41.220 docker login -u admin -p admin123 172.31.46.195:8083"
 		    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.41.220  docker service rm javawebapp || true'
-            sh "ssh ubuntu@172.31.41.220  docker service create --name javawebapp -p 9090:8080 --replicas 3 akareem225/java-web-app:1"
+            sh "ssh ubuntu@172.31.41.220  docker service create --name javawebapp -p 9090:8080 --replicas 3 172.31.46.195:8083/java-web-app:1"
         }
     }
             
