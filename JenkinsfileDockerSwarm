@@ -6,6 +6,15 @@ node{
         def Maven_Home = tool name:"Maven-3.6.1"
         sh "${Maven_Home}/bin/mvn clean package"
     }
+    stage('ExecuteSoanrQubeReport')
+ {
+ sh  "${Maven_Home}/bin/mvn sonar:sonar"
+ }
+ 
+ stage('UploadArtifactintoNexus')
+ {
+ sh  "${Maven_Home}/bin/mvn deploy"
+ }
     stage('Build Docker Image'){
         sh "docker build -t akareem225/java-web-app:1 ."
     }
